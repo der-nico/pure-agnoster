@@ -22,8 +22,50 @@
 # \e8   => restore cursor position
 # \e[K  => clears everything after the cursor on the current line
 # \e[2K => clear everything on the current line
+# link to terminal colors table: http://www.calmar.ws/vim/256-xterm-24bit-rgb-color-chart.html
 
 
+# Taken from agnoster zsh theme https://github.com/agnoster/agnoster-zsh-theme and
+# partially changed {{{
+# Characters
+SEGMENT_SEPARATOR=""
+PLUSMINUS="\u00b1"
+BRANCH=""
+DETACHED="➦"
+CROSS="\u2718"
+LIGHTNING="\u26a1"
+GEAR="⚙"
+PYTHON=""
+
+CURRENT_BG='NONE'
+
+topline_segment_ret=''
+topline_segment() {
+	local bg fg
+	[[ -n $2 ]] && bg="%K{$2}" || bg="%k"
+	[[ -n $3 ]] && fg="%F{$3}" || fg="%f"
+	if [[ $CURRENT_BG != 'NONE' && $2 != $CURRENT_BG ]]; then
+		topline_segment_ret="%{$bg%F{$CURRENT_BG}%}$SEGMENT_SEPARATOR%{$fg%} "
+	else
+		topline_segment_ret="%{$bg%}%{$fg%} "
+	fi
+	CURRENT_BG=$2
+	[[ -n $1 ]] && topline_segment_ret="${topline_segment_ret}${1}"
+}
+
+# End the prompt, closing any open segments
+topline_end() {
+        if [[ -n $CURRENT_BG ]]; then
+       	 topline_segment_ret=" %{%k%F{$CURRENT_BG}%}$SEGMENT_SEPARATOR"
+        else
+       	 topline_segment_ret="%{%k%}"
+        fi
+	topline_segment_ret="${topline_segment_ret}%{%f%}"
+        CURRENT_BG=''
+}
+# }}}
+
+# "Unchanged" from default pure theme {{{
 # turns seconds into human readable time
 # 165392 => 1d 21h 56m 32s
 # https://github.com/sindresorhus/pretty-time-zsh
@@ -99,35 +141,49 @@ prompt_pure_string_length_to_var() {
 prompt_pure_preprompt_render() {
 	setopt localoptions noshwordsplit
 
+	# To clear the powerline part
+	CURRENT_BG='NONE'
 	# Check that no command is currently running, the preprompt will otherwise
 	# be rendered in the wrong place.
 	[[ -n ${prompt_pure_cmd_timestamp+x} ]] && [[ $1 != precmd ]] && return
 
 	# Set color for git branch/dirty status, change color if dirty checking has
 	# been delayed.
-	local git_color=242
-	[[ -n ${prompt_pure_git_last_dirty_check_timestamp+x} ]] && git_color=red
+	local git_color=10
+	[[ -n ${prompt_pure_git_last_dirty_check_timestamp+x} ]] && git_color=9
 
 	# Initialize the preprompt array.
 	local -a preprompt_parts
 
 	# Set the path.
-	preprompt_parts+=('%F{blue}%~%f')
+	topline_segment '%~' 14 0
+	preprompt_parts+=("$topline_segment_ret")
 
 	# Add git branch and dirty status info.
 	typeset -gA prompt_pure_vcs_info
 	if [[ -n $prompt_pure_vcs_info[branch] ]]; then
-		preprompt_parts+=("%F{$git_color}"'${prompt_pure_vcs_info[branch]}${prompt_pure_git_dirty}%f')
+		topline_segment "${prompt_pure_vcs_info[branch]} ${prompt_pure_git_dirty}$([[ -n $prompt_pure_git_arrows ]] && echo " $prompt_pure_git_arrows")" $git_color 0
+		preprompt_parts+=("$topline_segment_ret")
 	fi
 	# Git pull/push arrows.
-	if [[ -n $prompt_pure_git_arrows ]]; then
-		preprompt_parts+=('%F{cyan}${prompt_pure_git_arrows}%f')
-	fi
+#	if [[ -n $prompt_pure_git_arrows ]]; then
+#		preprompt_parts+=('%F{cyan}${prompt_pure_git_arrows}%f')
+#	fi
 
 	# Username and machine, if applicable.
-	[[ -n $prompt_pure_username ]] && preprompt_parts+=('$prompt_pure_username')
+	if [[ -n $prompt_pure_username ]] ; then
+		topline_segment prompt_pure_username black 255
+		preprompt_parts+=("$topline_segment_ret")
+	fi
 	# Execution time.
-	[[ -n $prompt_pure_cmd_exec_time ]] && preprompt_parts+=('%F{yellow}${prompt_pure_cmd_exec_time}%f')
+	if [[ -n $prompt_pure_cmd_exec_time ]] ; then
+		topline_segment $prompt_pure_cmd_exec_time 7 0
+		preprompt_parts+=("$topline_segment_ret")
+	fi
+
+	topline_end
+	preprompt_parts+=("$topline_segment_ret")
+
 
 	local cleaned_ps1=$PROMPT
 	local -H MATCH
@@ -143,7 +199,7 @@ prompt_pure_preprompt_render() {
 	local -ah ps1
 	ps1=(
 		$prompt_newline           # Initial newline, for spaciousness.
-		${(j. .)preprompt_parts}  # Join parts, space separated.
+		${(j..)preprompt_parts}  # Join parts, space separated.
 		$prompt_newline           # Separate preprompt and prompt.
 		$cleaned_ps1
 	)
@@ -424,6 +480,7 @@ prompt_pure_async_callback() {
 			;;
 	esac
 }
+# }}}
 
 prompt_pure_setup() {
 	# Prevent percentage showing up if output doesn't end with a newline.
@@ -455,10 +512,10 @@ prompt_pure_setup() {
 	add-zsh-hook preexec prompt_pure_preexec
 
 	# show username@host if logged in through SSH
-	[[ "$SSH_CONNECTION" != '' ]] && prompt_pure_username='%F{242}%n@%m%f'
+	[[ "$SSH_CONNECTION" != '' ]] && prompt_pure_username="$(topline_segment '%n@%m' black white)"
 
 	# show username@host if root, with username in white
-	[[ $UID -eq 0 ]] && prompt_pure_username='%F{white}%n%f%F{242}@%m%f'
+	[[ $UID -eq 0 ]] && prompt_pure_username="$(topline_segment '%n@%m' black 9)"
 
 	# if a virtualenv is activated, display it in grey
 	PROMPT='%(12V.%F{242}%12v%f .)'
