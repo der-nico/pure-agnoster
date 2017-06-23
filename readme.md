@@ -155,7 +155,7 @@ Update your `.zshrc` file with the following two lines:
 
 ```sh
 zplug mafredri/zsh-async, from:github
-zplug "YourFin/pure", use:pure.zsh, from:github, as:theme
+zplug "YourFin/pure", use:pure-agnoster.zsh, from:github, as:theme
 
 ```
 
