@@ -1,20 +1,12 @@
 {
-  "name": "pure-prompt",
+  "name": "pure-agnoster-prompt",
   "version": "1.5.2",
-  "description": "Pretty, minimal and fast ZSH prompt",
+  "description": "The bastard child of agnoster and pure",
   "license": "MIT",
-  "repository": "sindresorhus/pure",
+  "repository": "yourfin/agnoster",
   "author": {
-    "name": "Sindre Sorhus",
-    "email": "sindresorhus@gmail.com",
-    "url": "sindresorhus.com"
+    "url": "github.com/yourfin"
   },
-  "maintainers": [
-    {
-      "name": "Mathias Fredriksson",
-      "url": "github.com/mafredri"
-    }
-  ],
   "engines": {
     "node": ">=0.10.0"
   },
