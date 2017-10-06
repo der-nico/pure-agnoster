@@ -155,6 +155,11 @@ prompt_pure_preprompt_render() {
 	# Initialize the preprompt array.
 	local -a preprompt_parts
 
+	#show Gear if applicable
+	[[ $(jobs -l | wc -l) -gt 0 ]] &&
+	    topline_segment "$GEAR" 0 32 &&
+	    preprompt_parts+=("$topline_segment_ret")
+
 	# Set the path.
 	topline_segment '%~' 14 0
 	preprompt_parts+=("$topline_segment_ret")
@@ -513,6 +518,9 @@ prompt_pure_setup() {
 
 	# show username@host if logged in through SSH
 	[[ "$SSH_CONNECTION" != '' ]] && prompt_pure_username="$(topline_segment '%n@%m' black white)"
+
+	# Gear thingy for background process
+	[[ $(jobs -l | wc -l) -gt 0 ]] && symbols+="%{%F{cyan}%}$GEAR"
 
 	# show username@host if root, with username in white
 	[[ $UID -eq 0 ]] && prompt_pure_username="$(topline_segment '%n@%m' black 9)"
