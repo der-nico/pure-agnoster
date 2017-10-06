@@ -45,7 +45,7 @@ topline_segment() {
 	[[ -n $2 ]] && bg="%K{$2}" || bg="%k"
 	[[ -n $3 ]] && fg="%F{$3}" || fg="%f"
 	if [[ $CURRENT_BG != 'NONE' && $2 != $CURRENT_BG ]]; then
-		topline_segment_ret="%{$bg%F{$CURRENT_BG}%}$SEGMENT_SEPARATOR%{$fg%} "
+		topline_segment_ret=" %{$bg%F{$CURRENT_BG}%}$SEGMENT_SEPARATOR%{$fg%} "
 	else
 		topline_segment_ret="%{$bg%}%{$fg%} "
 	fi
