@@ -172,11 +172,6 @@ prompt_pure_preprompt_render() {
 	# Initialize the preprompt array.
 	local -a preprompt_parts
 
-	#show Gear if applicable
-	[[ $(jobs -l | wc -l) -gt 0 ]] &&
-		topline_segment "$GEAR" 0 32 &&
-		preprompt_parts+=("$topline_segment_ret")
-
 	# Set the path.
 	topline_segment '%~' blue black
 	preprompt_parts+=("$topline_segment_ret")
@@ -205,6 +200,11 @@ prompt_pure_preprompt_render() {
 
 	topline_end
 	preprompt_parts+=("$topline_segment_ret")
+
+	#show Gear if applicable
+	[[ $(jobs -l | wc -l) -gt 0 ]] &&
+		topline_segment "$GEAR" 0 32 &&
+		preprompt_parts+=("$topline_segment_ret")
 
 
 	local cleaned_ps1=$PROMPT
@@ -257,6 +257,10 @@ prompt_pure_precmd() {
 	# Pure should take back control.
 	if [[ -n $VIRTUAL_ENV ]] && [[ -z $VIRTUAL_ENV_DISABLE_PROMPT || $VIRTUAL_ENV_DISABLE_PROMPT = 12 ]]; then
 		psvar[12]="${VIRTUAL_ENV:t}"
+		export VIRTUAL_ENV_DISABLE_PROMPT=12
+	fi
+	if [[ -n "$CONDA_DEFAULT_ENV" ]] && [[ -z $VIRTUAL_ENV_DISABLE_PROMPT || $VIRTUAL_ENV_DISABLE_PROMPT = 12 ]]; then
+		psvar[12]="${CONDA_DEFAULT_ENV:t}"
 		export VIRTUAL_ENV_DISABLE_PROMPT=12
 	fi
 
