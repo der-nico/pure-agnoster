@@ -173,7 +173,7 @@ prompt_pure_preprompt_render() {
 	local -a preprompt_parts
 
 	# Set the path.
-	topline_segment '%~' blue black
+	topline_segment '%~' $PATHCOLOR black
 	preprompt_parts+=("$topline_segment_ret")
 
 	# Add git branch and dirty status info.
@@ -693,8 +693,8 @@ prompt_pure_setup() {
 	ps4_parts=(
 		depth	  '%F{yellow}${(l:${(%)prompt_pure_debug_depth[1]}::+:)}%f'
 		compare   '${${(%)prompt_pure_debug_depth[2]}:#${(%)prompt_pure_debug_depth[3]}}'
-		main      '%F{blue}${${(%)prompt_pure_debug_depth[3]}:t}%f%F{242}:%I%f %F{242}@%f%F{blue}%N%f%F{242}:%i%f'
-		secondary '%F{blue}%N%f%F{242}:%i'
+		main      '%F{$PATHCOLOR}${${(%)prompt_pure_debug_depth[3]}:t}%f%F{242}:%I%f %F{242}@%f%F{$PATHCOLOR}%N%f%F{242}:%i%f'
+		secondary '%F{$PATHCOLOR}%N%f%F{242}:%i'
 		prompt	  '%F{242}>%f '
 	)
 	# Combine the parts with conditional logic. First the `:+` operator is
